@@ -1,10 +1,11 @@
 import { PrizesContext } from '@/contexts/PrizesContext';
 import usePrizes from '@/hooks/usePrizes';
-import { ActionIcon, Card, Group, Table, TextInput, Title } from '@mantine/core';
-import { IconEdit, IconTrash } from '@tabler/icons-react';
+import { Card, Group, rem, Table, TextInput, Title, Menu, Button } from '@mantine/core';
+import {  IconTrash, IconSettings} from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import ModalCrudPremios from '../Modals/ModalCrudPremios';
 import { ModalDelete } from '../Modals/ModalDelete';
+
 
 export function TableHomePremios() {
     const { getPrizes } = usePrizes()
@@ -23,12 +24,27 @@ export function TableHomePremios() {
             <Table.Td>{prizes.status}</Table.Td>
             <Table.Td>
                 <Group>
-                    <ActionIcon variant="filled" aria-label="Settings" onClick={() => { setOpenModalEdit(true), setData(prizes), getPrizes() }}>
-                        <IconEdit style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                    </ActionIcon>
-                    <ActionIcon variant="filled" color="red" aria-label="Settings" onClick={() => { setOpenModalDelete(true), getPrizes(),setData(prizes) }}>
-                        <IconTrash style={{ width: '70%', height: '70%' }} stroke={1.5} />
-                    </ActionIcon>
+                    <Menu shadow="md" width={200}>
+                        <Menu.Target>
+                            <Button>Acciones</Button>
+                        </Menu.Target>
+
+                        <Menu.Dropdown>
+                            <Menu.Label>Edición</Menu.Label>
+                            <Menu.Item
+                                onClick={() => { setOpenModalEdit(true), setData(prizes), getPrizes() }}
+                                leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
+                            Editar
+                            </Menu.Item>
+                            <Menu.Item 
+                                color='red'
+                                onClick={() => { setOpenModalDelete(true), getPrizes(),setData(prizes) }}
+                                leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}>
+                            Eliminar
+                            </Menu.Item>
+                            
+                        </Menu.Dropdown>
+                    </Menu>
                 </Group>
             </Table.Td>
         </Table.Tr>

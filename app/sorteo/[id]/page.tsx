@@ -25,6 +25,7 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
   const {data, getPrices} = usePrices(params.id);
   const {timeLeft} = useCountDown({targetDate: contest?.contestDate!})
   const {loading, response, register} = useRegister(params.id);
+  const [description, setDescription] = useState<string | undefined>();
 
   useEffect(() => {
     setTimmer(
@@ -82,10 +83,17 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
   }
 
   const handleRegister = () => {
-    if(discordUser.length >0)
-      register(discordUser)
+    if(discordUser.length >0){
+      setDescription(undefined);
+      try{
+        register(discordUser)
+      }
+      catch{
+        setDescription('Ocurrió un error')
+      }
+    }
     else{
-
+      setDescription('Ingresa tu correo');
     }
   }
 
@@ -118,7 +126,7 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
             {timeLeft.ended &&<Title className={styles.titleTime} order={2}>{getStatusContest()}</Title>}
             
             <Flex style={{zIndex: '2', margin: 'auto'}} gap={20} maw={'400px'} direction={'column'} align={'center'} justify={'center'}>
-              <TextInput value={discordUser} onChange={handleChange} style={{width:'100%'}} label="Usuario de Discord" variant="filled" size="xl" radius="lg" placeholder="pepito123" />
+              <TextInput error={description} description={description}  value={discordUser} onChange={handleChange} style={{width:'100%'}} label="Usuario de Discord" variant="filled" size="xl" radius="lg" placeholder="pepito123" />
               <Button loading={loading} onClick={handleRegister} fullWidth radius={'lg'} size='xl' color='teal'>Regístrate</Button>
             </Flex>
             <Flex pt={100}>
@@ -133,9 +141,9 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
         </Flex>
 
         <Flex wrap={'wrap'} justify={'center'} pt={50} gap={20}>
-          {prizes?.map(prize => 
+          {prizes?.map((prize, ind) => 
             <CardPrize 
-              key={prize.contestId} 
+              key={ind} 
               name={prize.name} 
               image={prize.image} 
               markAsDelivery={prize.markAsDelivery}
