@@ -41,6 +41,9 @@ export function TableHomeSorteos() {
     return (
         <>
 
+
+    
+
             <Card>
                 <Group justify="space-between" pb={24}>
                     <Title order={1}>Sorteos</Title>
@@ -61,7 +64,7 @@ export function TableHomeSorteos() {
                     </Table>
                 </Table.ScrollContainer>
             </Card>
-            <ModalCrudSorteos abrirModal={openModalEdit} setModalEdit={setOpenModalEdit} title='Editar sorteo' data={data} action={action} />
+        <ModalCrudSorteos abrirModal={openModalEdit} setModalEdit={setOpenModalEdit} title='Sorteo' data={data} action={action} />|
             <ModalDelete abrirModal={openModalDelete} setModalDelete={setOpenModalDelete} title='sorteo: ' data={data} action='contest' />
         </>
     );

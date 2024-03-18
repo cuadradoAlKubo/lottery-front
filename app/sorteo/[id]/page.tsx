@@ -8,10 +8,11 @@ import CardPrize from '@/components/Lotterys/CardPrize';
 import { IconChevronDown } from '@tabler/icons-react';
 import usePrices from '@/hooks/usePrices';
 import useCountDown from '@/hooks/useCountDown';
+import { Contest, Prize } from '@/interfaces/prices.interface';
+import useRegister from '@/hooks/useRegister';
+const socketEndpoint = 'https://privatedevs.com';
+const socketOptions = { path: '/api-contest/socket.io' };
 
-export const socket = io('https://privatedevs.com', 
-  {path: '/api-contest/socket.io',
-});
 
 export default function SorteoPage({ params }: { params: { id: string } }) {
   const [opened, setOpened] = useState<boolean | undefined>(false);
@@ -33,24 +34,31 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
   }, [timeLeft])
 
 
+
   useEffect(() => {
+    const socket = io(socketEndpoint, socketOptions);
+
     socket.on('connect', () => {
       console.log('Connected to server');
     });
-    
-    socket.on('contestUpdated ', (payload) =>{
-      console.log(payload)
-      getPrices()
-    })
+
+    socket.on('contestUpdated', (payload) => {
+      console.log(payload);
+      getPrices();
+    });
 
     socket.on("error", (error) => {
-      console.log(error)
+      console.log(error);
     });
 
     return () => {
       socket.off('connect');
+      socket.off('contestUpdated');
+      socket.off('error');
+      socket.disconnect();
     };
-  }, [socket]);
+  }, [getPrices]);
+
 
   return (
     <AppShell
