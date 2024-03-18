@@ -8,68 +8,77 @@ import ModalCrudSorteos from '../Modals/ModalCrudSorteos';
 import { ModalDelete } from '../Modals/ModalDelete';
 import { Contest } from '@/interfaces/constest.inteface';
 import usePlayContest from '@/hooks/usePlayContest';
+import { User } from '@/interfaces/auth.interface';
 type action = 'edit' | 'create'
 export function TableHomeSorteos() {
+    const [localStorageUser, setLocalStorageUser] = useState<User>();
     const { getContests } = useContest()
     useEffect(() => {
         getContests();
     }, [])
-
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            setLocalStorageUser(user);
+        }
+    }, []);
     const { state } = useContext(ContestContext);
     const [openModalEdit, setOpenModalEdit] = useState(false)
     const [action, setaction] = useState<action>("create")
     const [openModalDelete, setOpenModalDelete] = useState(false)
     const {playContest, data: lotResponse} = usePlayContest()
     const [data, setData] = useState<Contest>()
-    const rows = state.payload.map((contest, index) => (
-        <Table.Tr key={index}>
-            <Table.Td>{contest.name}</Table.Td>
-            <Table.Td>{contest.rounds}</Table.Td>
-            <Table.Td>{contest.contestStatus}</Table.Td>
-            <Table.Td>{contest.createdBy.name}</Table.Td>
-            <Table.Td>
-                <Group>
-                    <Menu shadow="md" width={200}>
-                        <Menu.Target>
-                            <Button>Acciones</Button>
-                        </Menu.Target>
+    const rows = state.payload
+        .filter(contest => contest.status === true && contest.createdBy.name === localStorageUser?.name)
+        .map((contest, index) => (
+            <Table.Tr key={index}>
+                <Table.Td>{contest.name}</Table.Td>
+                <Table.Td>{contest.rounds}</Table.Td>
+                <Table.Td>{contest.contestStatus}</Table.Td>
+                <Table.Td>{contest.createdBy.name}</Table.Td>
+                <Table.Td>
+                    <Group>
+                        <Menu shadow="md" width={200}>
+                            <Menu.Target>
+                                <Button>Acciones</Button>
+                            </Menu.Target>
 
-                        <Menu.Dropdown>
-                            <Menu.Label>Edición</Menu.Label>
-                            <Menu.Item
-                                color={'blue'}
-                                onClick={() => { setOpenModalEdit(true), setData(contest), setaction("edit") }}
-                                leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
-                            Publicar enlace
-                            </Menu.Item>
-                            <Menu.Item
-                                onClick={() => { setOpenModalEdit(true), setData(contest), setaction("edit") }}
-                                leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
-                            Editar
-                            </Menu.Item>
-                            <Menu.Item 
-                                color='red'
-                                onClick={() => { setOpenModalDelete(true), setData(contest) }}
-                                leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}>
-                            Eliminar
-                            </Menu.Item>
+                            <Menu.Dropdown>
+                                <Menu.Label>Edición</Menu.Label>
+                                <Menu.Item
+                                    color={'blue'}
+                                    onClick={() => { setOpenModalEdit(true), setData(contest), setaction("edit") }}
+                                    leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
+                                Publicar enlace
+                                </Menu.Item>
+                                <Menu.Item
+                                    onClick={() => { setOpenModalEdit(true), setData(contest), setaction("edit") }}
+                                    leftSection={<IconSettings style={{ width: rem(14), height: rem(14) }} />}>
+                                Editar
+                                </Menu.Item>
+                                <Menu.Item 
+                                    color='red'
+                                    onClick={() => { setOpenModalDelete(true), setData(contest) }}
+                                    leftSection={<IconTrash style={{ width: rem(14), height: rem(14) }} />}>
+                                Eliminar
+                                </Menu.Item>
 
-                            <Menu.Divider />
+                                <Menu.Divider />
 
-                            <Menu.Label>Sorteo</Menu.Label>
-                            <Menu.Item
-                                color='green'
-                                leftSection={<IconArrowsLeftRight style={{ width: rem(14), height: rem(14) }} />}
-                                onClick={() => playContest(contest._id)}
-                            >
-                            Sortear premio
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
-                </Group>
-            </Table.Td>
-        </Table.Tr>
-    ));
+                                <Menu.Label>Sorteo</Menu.Label>
+                                <Menu.Item
+                                    color='green'
+                                    leftSection={<IconArrowsLeftRight style={{ width: rem(14), height: rem(14) }} />}
+                                    onClick={() => playContest(contest._id)}
+                                >
+                                Sortear premio
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+                    </Group>
+                </Table.Td>
+            </Table.Tr>
+        ));
 
     return (
         <>
