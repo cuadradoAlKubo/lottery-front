@@ -51,8 +51,14 @@ export default function ModalCrudSorteos({ action, abrirModal = false, title, se
                         onChange={(e: any) => handleInputChange(e, 'rounds')} value={newValue?.rounds} />
                     <InputCol label="Fecha del sorteo" type="datetime-local"
                         onChange={(e: any) => handleInputChange(e, 'contestDate')} value={newValue?.contestDate} />
-                    <DropzoneCol onDrop={handleDrop} />
-                    <PreviewCol previews={previews} />
+                    {
+                        action === "edit" ? (
+                            <>
+                                <DropzoneCol onDrop={handleDrop} />
+                                <PreviewCol previews={previews} />
+                            </>
+                        ) : null
+                    }
                     <ButtonCol onClick={() => { handlePostContest(), getContests(), setModalEdit(false) }} />
                 </Grid>
             </Modal>

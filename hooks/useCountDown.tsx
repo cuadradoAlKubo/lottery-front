@@ -18,7 +18,7 @@ const useCountDown = ({ targetDate }: Props) => {
         hours: 0,
         minutes: 0,
         seconds: 0,
-        ended: false
+        ended: true
     };
 
     if (difference > 0) {

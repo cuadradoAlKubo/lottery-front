@@ -11,6 +11,7 @@ import usePrizes from '@/hooks/usePrizes';
 import useContest from '@/hooks/useConstest';
 import { ContestContext } from '@/contexts/ContestContext';
 import { User } from '@/interfaces/auth.interface';
+import useImageUploader from '@/hooks/useImages';
 
 const initialState = { name: "", description: "", contestId: 0, orderToLot: 1 };
 
@@ -19,10 +20,9 @@ interface ModalCrudSorteosProps {
     title?: string
     setModalEdit?: (value: boolean) => void
     data?: Payload | undefined
-    action: "create" | "edit"
 }
 
-export default function ModalCrudSorteos({ action, abrirModal = false, title, setModalEdit = () => { }, data = {
+export default function ModalCrudPremios({ action, abrirModal = false, title, setModalEdit = () => { }, data = {
     name: "",
     description: ""
 } }: ModalCrudSorteosProps) {
@@ -44,6 +44,7 @@ export default function ModalCrudSorteos({ action, abrirModal = false, title, se
     const [newValue, setNewValue] = useState(data)
     const [files, setFiles] = useState<FileWithPath[]>([]);
     const { post: postApi, put: putApi } = useApi();
+    const { uploadImage } = useImageUploader();
     useEffect(() => {
         abrirModal ? open() : close()
     }, [abrirModal])
@@ -54,13 +55,19 @@ export default function ModalCrudSorteos({ action, abrirModal = false, title, se
         let tempNombresSorteos: any = []
         let tempSorteos: any = []
         state.payload.map((sorteo) => {
-            if (sorteo.createdBy.name === localStorageUser?.name) {
+            if (sorteo.createdBy.name === localStorageUser?.name && sorteo.status === true) {
                 tempNombresSorteos.push({ label: sorteo.name, value: sorteo._id })
             }
         })
+        console.log(tempNombresSorteos);
+        // Actualizar estados
         setNombresSorteos(tempNombresSorteos);
         setSorteos(tempSorteos);
+
     }, [state, localStorageUser])
+    useEffect(() => {
+
+    }, [data])
 
 
     const handleDrop = (files: FileWithPath[]) => {
@@ -81,17 +88,23 @@ export default function ModalCrudSorteos({ action, abrirModal = false, title, se
         setNewValue({ ...newValue, contestId: value });
     };
 
+
     const handlePostPrizes = async () => {
-        console.log(post);
+        const action: string = 'create';
+
         if (action === 'create') {
             await postApi('https://privatedevs.com/api-contest/api/v1/prizes/create', { name: post.name, description: post.description, contestId: post.contestId, orderToLot: post.orderToLot });
         } else if (action === 'edit' && data) {
             await putApi(`https://privatedevs.com/api-contest/api/v1/prizes/${data._id}`, { name: post.name, description: post.description, contestId: post.contestId, orderToLot: post.orderToLot });
         }
+
+        if (files.length > 0) {
+            await uploadImage(`https://privatedevs.com/api-contest/api/v1/uploads/prizes/${data._id}`, files[0]);
+        }
+
         setPost(initialState);
         close();
     };
-
     const previews = files.map((file, index) => {
         const imageUrl = URL.createObjectURL(file);
         return <Image height={200} width={200} key={index} src={imageUrl} onLoad={() => URL.revokeObjectURL(imageUrl)} />;
@@ -108,8 +121,15 @@ export default function ModalCrudSorteos({ action, abrirModal = false, title, se
                     <InputCol label="Orden de ronda" placeholder={data?.orderToLot} type='number' onChange={(e: any) => handleInputChange(e, 'orderToLot')} />
                     <StatusCol onChange={handleStatusChange} sorteos={nombresSorteos} />
                     <TextCol label="Descripción" onChange={(e: any) => handleInputChange(e, 'description')} value={newValue?.description} />
-                    <DropzoneCol onDrop={handleDrop} />
-                    <PreviewCol previews={previews} />
+                    {
+                        action === "edit" ? (
+                            <>
+                                <DropzoneCol onDrop={handleDrop} />
+                                <PreviewCol previews={previews} />
+                            </>
+                        ) : null
+                    }
+
                     <ButtonCol onClick={() => { handlePostPrizes(), getPrizes(), setModalEdit(false) }} />
                 </Grid>
             </Modal>
@@ -175,8 +195,13 @@ const PreviewCol = ({ previews }: any) => (
 const ButtonCol = ({ onClick }: any) => (
     <Grid.Col span={{ base: 12, md: 6, lg: 12 }}>
         <Group justify="end">
-            <Button onClick={onClick}>Agregar premio</Button>
+            <Button onClick={onClick}>Publicar sorteo</Button>
         </Group>
     </Grid.Col>
 );
+
+function putApi (arg0: string, arg1: { name: string; description: string; contestId: number; orderToLot: number; })
+{
+    throw new Error('Function not implemented.');
+}
 

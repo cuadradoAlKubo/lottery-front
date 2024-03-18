@@ -1,5 +1,5 @@
 import { useDisclosure } from '@mantine/hooks';
-import { Modal, Button, Title, Group } from '@mantine/core';
+import { Modal, Button, Title, Group, Center } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Contest } from '@/interfaces/constest.inteface';
 import { Payload } from '@/interfaces/prizes.interfaces';
@@ -16,16 +16,17 @@ interface ModalDeleteProps {
 
 export function ModalDelete({ abrirModal = true, title, setModalDelete = () => { }, data, action }: ModalDeleteProps) {
     const [opened, { open, close }] = useDisclosure(false);
-    const [newData, setNewData] = useState<Contest | Payload>({} as Contest | Payload)
+    const [newData, setNewData] = useState<Contest | Payload>()
     const { del } = useApi();
     useEffect(() => {
         abrirModal ? open() : close()
     }, [abrirModal, close])
     useEffect(() => {
-        if (data) {
-            setNewData(data);
-        }
-    }, [])
+
+        setNewData(data);
+        console.log(data);
+
+    }, [data])
     const handleDelete = async () => {
         setModalDelete(false);
         let endpoint = '';
@@ -45,7 +46,9 @@ export function ModalDelete({ abrirModal = true, title, setModalDelete = () => {
     return (
         <>
             <Modal centered opened={opened} onClose={() => { close(), setModalDelete(false) }} title={title}>
-                <Title pb={24} order={4}>Estas seguro de Elimnar {title} {newData?.name}</Title>
+                <Center>
+                    <Title pb={24} order={3}>Estas seguro de Elimnar {title} {newData?.name}</Title>
+                </Center>
                 <Group justify="end">
                     <Group justify="space-between">
                         <Button onClick={close}>Cancel</Button>
