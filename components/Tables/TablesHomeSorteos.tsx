@@ -1,18 +1,22 @@
 'use client'
 import { ContestContext } from '@/contexts/ContestContext';
 import useContest from '@/hooks/useConstest';
-import { ActionIcon, Button, Card, Group, Table, Menu, Title, rem } from '@mantine/core';
-import { IconEdit, IconTrash, IconSettings, IconArrowsLeftRight } from '@tabler/icons-react';
+import { ActionIcon, Button, Card, Group, Table, Menu, Title, rem, Notification } from '@mantine/core';
+import { IconEdit, IconTrash, IconSettings, IconArrowsLeftRight, IconSum, IconPlus } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import ModalCrudSorteos from '../Modals/ModalCrudSorteos';
 import { ModalDelete } from '../Modals/ModalDelete';
 import { Contest } from '@/interfaces/constest.inteface';
 import usePlayContest from '@/hooks/usePlayContest';
 import { User } from '@/interfaces/auth.interface';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import ModalSorteo from '../Modals/ModalSorteo';
 type action = 'edit' | 'create'
 export function TableHomeSorteos() {
     const [localStorageUser, setLocalStorageUser] = useState<User>();
     const { getContests } = useContest()
+    const [errorRound, setErrorRound] = useState(false)
     useEffect(() => {
         getContests();
     }, [])
@@ -24,9 +28,9 @@ export function TableHomeSorteos() {
     }, []);
     const { state } = useContext(ContestContext);
     const [openModalEdit, setOpenModalEdit] = useState(false)
+    const [openSorteoModal, setOpenSorteoModal] = useState(false);
     const [action, setaction] = useState<action>("create")
     const [openModalDelete, setOpenModalDelete] = useState(false)
-    const {playContest, data: lotResponse} = usePlayContest()
     const [data, setData] = useState<Contest>()
     const rows = state.payload
         .filter(contest => contest.status === true && contest.createdBy.name === localStorageUser?.name)
@@ -66,10 +70,18 @@ export function TableHomeSorteos() {
                                 <Menu.Divider />
 
                                 <Menu.Label>Sorteo</Menu.Label>
+                                <Link style={{textDecoration:'none'}} href={'/dashboard/premios'}>
+                                    <Menu.Item
+                                        leftSection={<IconPlus style={{ width: rem(14), height: rem(14) }} />}
+                                    >
+                                    Agregar premios
+                                    </Menu.Item>
+                                </Link>
+
                                 <Menu.Item
                                     color='green'
                                     leftSection={<IconArrowsLeftRight style={{ width: rem(14), height: rem(14) }} />}
-                                    onClick={() => playContest(contest._id)}
+                                    onClick={()=>{setOpenSorteoModal(true), setData(contest)}}
                                 >
                                 Sortear premio
                                 </Menu.Item>
@@ -105,6 +117,10 @@ export function TableHomeSorteos() {
             </Card>
             <ModalCrudSorteos abrirModal={openModalEdit} setModalEdit={setOpenModalEdit} title='Editar sorteo' data={data} action={action} />
             <ModalDelete abrirModal={openModalDelete} setModalDelete={setOpenModalDelete} title='sorteo: ' data={data} action='contest' />
+            <ModalSorteo data={data} open={openSorteoModal} onClose={() => setOpenSorteoModal(false)}  title='Sortear premios'></ModalSorteo>
+            {errorRound && <Notification onClose={()=>setErrorRound(false)} pos={'absolute'} right={'0'} bottom={'0'} color="red" title="Ha ocurrido un error">
+                Asegúrate de haber creado los premios necesarios
+            </Notification>}
         </>
     );
 }

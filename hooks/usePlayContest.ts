@@ -1,31 +1,58 @@
 
-import { ContestData } from "@/interfaces/prices.interface";
+import { RoundCreated } from "@/interfaces/round.interface";
 import { useState } from "react";
 
 const usePlayContest = () => {
 
-    const [data, setData] = useState<ContestData>()
+    const [roundData, setRoundData] = useState<RoundCreated>()
+    const [lotData, setLotData] = useState()
+    const token = localStorage.getItem('token');
+    if (!token) {
+        throw new Error("No se encontró token");
+    }
 
     const playContest = async (id:string): Promise<void> => {
         const response = await fetch(
-            `https://privatedevs.com/api/v1/playRound/play/${id}`,
+            `https://privatedevs.com/api-contest/api/v1/playRound/play/${id}`,
             {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
             }
         );
 
         if (response.ok) {
             const data = await response.json();
-            setData(data)
+            setLotData(data)
         } else {
             throw new Error("Failed to fetch contests");
         }
     };
 
-    return {data, playContest}
+    const createRound = async ({idContest, round}:{idContest: string, round: number}): Promise<void> => {
+        const response = await fetch(
+            `https://privatedevs.com/api-contest/api/v1/playRound/create`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({contestId: idContest, round})
+            }
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            setRoundData(data)
+        } else {
+            throw new Error("Failed to fetch contests");
+        }
+    };
+
+    return {roundData, playContest, createRound, lotData}
 };
 
 export default usePlayContest;

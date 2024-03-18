@@ -72,7 +72,7 @@ const StatusCol = ({ onChange, placeholder = "OPEN | PENDING | FINISHED" }: any)
         <Select
             label="Estado del sorteo"
             placeholder={placeholder}
-            data={["OPEN", " PENDING", "FINISHED"]}
+            data={["OPEN", "PENDING", "FINISHED"]}
             onChange={onChange}
         />
     </Grid.Col>
