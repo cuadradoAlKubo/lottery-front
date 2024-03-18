@@ -1,6 +1,7 @@
 'use client'
 import { AppShell, Burger, Group, UnstyledButton, Text, Title, Button, InputLabel, Input, Flex, TextInput, Card, Badge } from '@mantine/core';
 import Image from 'next/image';
+import { useWindowScroll } from '@mantine/hooks';
 import { io } from 'socket.io-client';
 import styles from './page.module.css'
 import { useEffect, useRef, useState } from 'react';
@@ -16,6 +17,7 @@ export const socket = io('https://privatedevs.com',
 });
 
 export default function SorteoPage({ params }: { params: { id: string } }) {
+  const [scroll, scrollTo] = useWindowScroll();
   const [opened, setOpened] = useState<boolean | undefined>(false);
   const [timmer, setTimmer] = useState("00:00:00");
   const [discordUser, setDiscordUser] = useState("")
@@ -95,6 +97,10 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
     else{
       setDescription('Ingresa tu correo');
     }
+    if(discordUser.length >0)
+      register(discordUser)
+
+     
   }
 
   return (
@@ -118,7 +124,7 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
         </div>
         <div className={styles.bg}></div>
         <div className='main' style={{zIndex: 10, position: 'relative'}}>
-            
+
             <Title order={1} style={{textAlign: 'center'}} fw={400} pb={50} pt={100}>Sorteo: <span style={{fontSize: '60px', fontWeight: '600'}}>{contest?.name}</span></Title>
             {/* <Title order={1} style={{textAlign: 'center'}} pt={20}>Ronda: 1</Title> */}
             {timeLeft.days > 0 && <Title order={1} style={{textAlign: 'center'}}>{timeLeft.days} días</Title>}
@@ -126,11 +132,13 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
             {timeLeft.ended &&<Title className={styles.titleTime} order={2}>{getStatusContest()}</Title>}
             
             <Flex style={{zIndex: '2', margin: 'auto'}} gap={20} maw={'400px'} direction={'column'} align={'center'} justify={'center'}>
-              <TextInput error={description} description={description}  value={discordUser} onChange={handleChange} style={{width:'100%'}} label="Usuario de Discord" variant="filled" size="xl" radius="lg" placeholder="pepito123" />
+            {response && response.status === 200 && <Badge size="xl" color="teal">Registrado con exito!</Badge>}
+            {response && response.status === 400 && <Badge size="xl" color="red">{response.msg}</Badge>}
+              <TextInput value={discordUser} onChange={handleChange} style={{width:'100%'}} label="Usuario de Discord" variant="filled" size="xl" radius="lg" placeholder="pepito123" />
               <Button loading={loading} onClick={handleRegister} fullWidth radius={'lg'} size='xl' color='teal'>Regístrate</Button>
             </Flex>
             <Flex pt={100}>
-              <Button  fz={22} leftSection={<IconChevronDown size={30} />}  rightSection={<IconChevronDown size={30} />} style={{margin: 'auto'}} variant="transparent" color="gray" size="xl">Ver premios </Button>
+              <Button onClick={() => scrollTo({ y: 400 })}  fz={22} leftSection={<IconChevronDown size={30} />}  rightSection={<IconChevronDown size={30} />} style={{margin: 'auto'}} variant="transparent" color="gray" size="xl">Ver premios </Button>
             </Flex>
         </div>
       </AppShell.Main>
@@ -143,7 +151,7 @@ export default function SorteoPage({ params }: { params: { id: string } }) {
         <Flex wrap={'wrap'} justify={'center'} pt={50} gap={20}>
           {prizes?.map((prize, ind) => 
             <CardPrize 
-              key={ind} 
+              key={prize._id} 
               name={prize.name} 
               image={prize.image} 
               markAsDelivery={prize.markAsDelivery}

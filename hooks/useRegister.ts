@@ -15,17 +15,20 @@ const useRegister = (id:string) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({discrodUser: user})
+                body: JSON.stringify({discordUser: user})
             }
         );
 
-        if (response.ok) {
+        if (response.status === 200) {
+    
+            const data = await response.json();
+            setResponse(data)
+            setLoading(false);
+        } else {
             setLoading(false);
             const data = await response.json();
             setResponse(data)
-        } else {
-            setLoading(false);
-            throw new Error("Failed to fetch contests");
+            // throw new Error("Failed to fetch contests");
         }
     };
 
