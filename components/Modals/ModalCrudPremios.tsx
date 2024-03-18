@@ -20,6 +20,7 @@ interface ModalCrudSorteosProps {
     title?: string
     setModalEdit?: (value: boolean) => void
     data?: Payload | undefined
+    action: "create" | "edit"
 }
 
 export default function ModalCrudPremios({ action, abrirModal = false, title, setModalEdit = () => { }, data = {
